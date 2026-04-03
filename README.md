@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Blanky
+
+A Spanish fill-in-the-blank exercise generator for language tutors. Paste in a situation and grammar topic, and Blanky produces a natural dialogue with strategically placed blanks and an answer key — ready to share with students.
+
+## Features
+
+- Two-pass GPT-4o pipeline: first generates a natural conversation, then places blanks on words that demonstrate the target grammar
+- Supports 5 dialects: Neutral, Mexican, Spain, Argentine, Colombian
+- Levels: Beginner, Intermediate, Advanced, Expert
+- Optional custom character names (falls back to random Spanish names)
+- Accent-insensitive answer checking
+- Student view at `/student` — shareable via localStorage handoff
+- PDF export of the exercise
+
+## Stack
+
+- Next.js 16 (App Router), React 19, TypeScript 5
+- Tailwind CSS v4 + shadcn/ui
+- OpenAI GPT-4o via the official SDK
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- An OpenAI API key
+
+### Setup
+
+```bash
+npm install
+```
+
+Create a `.env.local` file in the project root:
+
+```
+OPENAI_API_KEY=your_key_here
+```
+
+### Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How It Works
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Fill in the situation, grammar topic, level, dialect, and optional character names
+2. Blanky calls `/api/generate` to write a complete natural dialogue
+3. Then calls `/api/blanks` to select 4–6 words that clearly demonstrate the grammar topic and replace them with numbered blanks (`____[1]`, `____[2]`, etc.)
+4. Conjugation topics include an infinitive hint: `____[1] (estar)`
+5. An answer key is generated with grammar notes for each blank
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+  page.tsx              # Main UI (centered → split layout after generation)
+  student/page.tsx      # Student-facing exercise view
+  api/
+    generate/route.ts   # Pass 1 — natural dialogue generation
+    blanks/route.ts     # Pass 2 — blank placement
+components/
+  GeneratorForm.tsx     # Form (centered and sidebar variants)
+  DialogueOutput.tsx    # Interactive exercise renderer
+lib/
+  prompt.ts             # Builds the Pass 1 user prompt
+  options.ts            # Level and dialect dropdown data
+  names.ts              # Spanish name pool + pickTwoNames()
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run dev      # Start development server
+npm run build    # Production build
+npm run start    # Start production server
+npm run lint     # Run ESLint
+```
